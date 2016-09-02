@@ -1,25 +1,136 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
+title: "Peer Assessment I"
+author: "ferjmele"
+date: "2 de septiembre de 2016"
+output: md_document
 ---
 
+```{r setup, echo = FALSE}
+library(knitr)
+opts_chunk$set(echo = TRUE, results="asis")
+```
 
-## Loading and preprocessing the data
+## R Markdown
 
+This is an R Markdown document for Peer Assessment I of the Reproducible Research Course of John Hopkings University offered by Coursera.
 
+## Loading and Preprocessing Data
 
-## What is mean total number of steps taken per day?
+First clean variables and read data
 
+```{r load}
+rm(list=ls(all=TRUE))
+db<-read.csv("activity.csv")
+```
 
+Then pre-process data, to have dates as date format (not factors) in case needed
+
+```{r proc}
+db$date1<-as.character(db$date)
+db$date1<-as.Date(db$date1, format="%Y-%m-%d")
+```
+
+An example of resulting data
+
+```{r showexampe}
+str(db)
+head(db, n=10)
+```
+
+## What is the mean of total number of steps taken by day?
+
+First calculate total number of steps taken by day without considering na values, and make Histogram
+
+```{r totalsteps}
+daysum<-aggregate(db$steps ~ db$date1, FUN = sum, na.action = na.omit)
+colnames(daysum)<-c("date","steps")
+hist(daysum$steps,breaks=10, col="red", xlab="daily steps", ylab="frequency", main="Frequency of steps per day", xlim=c(0,25000),ylim=c(0,20))
+```
+
+Mean and Median of total steps per day
+
+```{r meanmedian}
+mean(daysum$steps)
+median(daysum$steps)
+```
 
 ## What is the average daily activity pattern?
 
+We can see steps for each interval and show max value
 
+``` {r intervals}
+intervalmean<-aggregate(db$steps ~ db$interval, FUN = mean, na.action = na.omit)
+colnames(intervalmean)<-c("interval","steps")
+plot(intervalmean$interval, intervalmean$steps, type="l", main="Steps per interval", xlab="Interval", ylab="Steps")
+```
+
+To get interval with maximun steps averaged across all days
+
+```{r maxinterval}
+rowmax<-which.max(intervalmean$steps)
+result<-intervalmean[rowmax,1]
+```
+
+The interval with maximun steps averaged across all days is `r result`.
 
 ## Imputing missing values
 
+Firstly, we evaluate how many NAs are
 
+```{r nascount}
+nascount<-sum(is.na(db$steps))
+```
 
-## Are there differences in activity patterns between weekdays and weekends?
+There are `r nascount` NA values in steps variable, from a total of `r nrow(db)`.
+
+Create a function to replace if value is NA, and then replace them with mean for that interval across all days. New Dataset is created with "stepsnonas" variable.
+
+```{r nareplace}
+nareplace<-function(x,y) {
+  if(is.na(x)){
+    return(y)
+  }
+  return(x)
+}
+dbnonas<-merge(db,intervalmean, by.x="interval",by.y="interval", all.x=TRUE)
+dbnonas$stepsnonas<-mapply(nareplace,dbnonas$steps.x,dbnonas$steps.y)
+```
+
+Histogram and reported mean and median with NAs replaced
+
+```{r totalsteps1}
+daysumnonas<-aggregate(dbnonas$stepsnonas ~ dbnonas$date1, FUN = sum, na.action=na.pass)
+colnames(daysumnonas)<-c("date","steps")
+hist(daysumnonas$steps,breaks=10, col="red", xlab="daily steps", ylab="frequency", main="Freq of steps per day with NAs replaced", xlim=c(0,25000),ylim=c(0,20))
+```
+
+Mean and Median of total steps per day with no NAs
+
+```{r meanmedian1}
+mean(daysumnonas$steps)
+median(daysumnonas$steps)
+```
+
+Answer=strategy used made the median to approach the mean. But there are no significant changes.
+
+## Are there any differences in activity patterns between weekdays and weekends?
+
+To create a factor variable to separate weekdays from weekends and then plot the two graphs together
+
+``` {r weekd}
+library(lubridate)
+dbnonas$dow<- wday(dbnonas$date1)
+ww<-function(x) {
+  if(x==1 | x==7) {
+    return("weekend")
+  }
+  return("weekday")
+}
+dbnonas$wdaywend<-mapply(ww, dbnonas$dow)
+dbnonas$wdaywend<-as.factor(dbnonas$wdaywend)
+intervalmean2<-aggregate(dbnonas$stepsnonas ~ dbnonas$interval + dbnonas$wdaywend, FUN = mean, na.action = na.pass)
+colnames(intervalmean2)<-c("interval","wdaywend", "steps")
+library(lattice)
+xyplot(steps~interval | wdaywend, data = intervalmean2, type = 'l',xlab = 'Interval',ylab = "Steps",layout = c(1,2))
+```
+
