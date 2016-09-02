@@ -50,9 +50,11 @@ hist(daysum$steps,breaks=10, col="red", xlab="daily steps", ylab="frequency", ma
 Mean and Median of total steps per day
 
 ```{r meanmedian}
-mean(daysum$steps)
-median(daysum$steps)
+m1<-mean(daysum$steps)
+m2<-median(daysum$steps)
 ```
+
+The mean of steps per day is `r m1` while the median is `r m2`
 
 ## What is the average daily activity pattern?
 
@@ -107,9 +109,11 @@ hist(daysumnonas$steps,breaks=10, col="red", xlab="daily steps", ylab="frequency
 Mean and Median of total steps per day with no NAs
 
 ```{r meanmedian1}
-mean(daysumnonas$steps)
-median(daysumnonas$steps)
+m3<-mean(daysumnonas$steps)
+m4<-median(daysumnonas$steps)
 ```
+
+The mean of steps per day is `r m3` while the median is `r m4`
 
 Answer=strategy used made the median to approach the mean. But there are no significant changes.
 

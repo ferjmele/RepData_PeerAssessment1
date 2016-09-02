@@ -50,13 +50,10 @@ na values, and make Histogram
 
 Mean and Median of total steps per day
 
-    mean(daysum$steps)
+    m1<-mean(daysum$steps)
+    m2<-median(daysum$steps)
 
-\[1\] 10766.19
-
-    median(daysum$steps)
-
-\[1\] 10765
+The mean of steps per day is 1.076618910^{4} while the median is 10765
 
 What is the average daily activity pattern?
 -------------------------------------------
@@ -108,13 +105,11 @@ Histogram and reported mean and median with NAs replaced
 
 Mean and Median of total steps per day with no NAs
 
-    mean(daysumnonas$steps)
+    m3<-mean(daysumnonas$steps)
+    m4<-median(daysumnonas$steps)
 
-\[1\] 10766.19
-
-    median(daysumnonas$steps)
-
-\[1\] 10766.19
+The mean of steps per day is 1.076618910^{4} while the median is
+1.076618910^{4}
 
 Answer=strategy used made the median to approach the mean. But there are
 no significant changes.
